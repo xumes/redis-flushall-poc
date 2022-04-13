@@ -1,0 +1,128 @@
+version: '3.9'
+
+services:
+  app:
+    build: .
+    command: npm run dev
+    volumes:
+      - .:/app/
+      - /app/node_modules
+    ports:
+      - "5050:5050"
+    networks:
+      app_subnet:
+        ipv4_address: 192.168.86.137
+
+  redis-cluster:
+    image: 'redis:6.0-alpine'
+    command: redis-cli --cluster create 192.168.86.31:6373 192.168.86.32:6374 192.168.86.33:6375 192.168.86.34:6376 192.168.86.35:6377 192.168.86.36:6378 --cluster-replicas 1 --cluster-yes
+    networks:
+      app_subnet:
+        ipv4_address: 192.168.86.30
+    depends_on:
+      - redis-node-1
+      - redis-node-2
+      - redis-node-3
+      - redis-node-4
+      - redis-node-5
+      - redis-node-6
+
+  redis-node-1:
+    image: 'redis:6.0-alpine'
+    command: redis-server /usr/local/etc/redis/redis.conf
+    ports:
+      - '6373:6373'
+    volumes:
+      - redis-node-1-data:/var/lib/redis
+      - ./redis/redis-node-1.conf:/usr/local/etc/redis/redis.conf
+    networks:
+      app_subnet:
+        ipv4_address: 192.168.86.31
+
+  redis-node-2:
+    image: 'redis:6.0-alpine'
+    command: redis-server /usr/local/etc/redis/redis.conf
+    ports:
+      - '6374:6374'
+    volumes:
+      - redis-node-2-data:/var/lib/redis
+      - ./redis/redis-node-2.conf:/usr/local/etc/redis/redis.conf
+    networks:
+      app_subnet:
+        ipv4_address: 192.168.86.32
+
+  redis-node-3:
+    image: 'redis:6.0-alpine'
+    command: redis-server /usr/local/etc/redis/redis.conf
+    ports:
+      - '6375:6375'
+    volumes:
+      - redis-node-3-data:/var/lib/redis
+      - ./redis/redis-node-3.conf:/usr/local/etc/redis/redis.conf
+    networks:
+      app_subnet:
+        ipv4_address: 192.168.86.33
+        
+  redis-node-4:
+    image: 'redis:6.0-alpine'
+    command: redis-server /usr/local/etc/redis/redis.conf
+    ports:
+      - '6376:6376'
+    volumes:
+      - redis-node-4-data:/var/lib/redis
+      - ./redis/redis-node-4.conf:/usr/local/etc/redis/redis.conf
+    networks:
+      app_subnet:
+        ipv4_address: 192.168.86.34
+
+  redis-node-5:
+    image: 'redis:6.0-alpine'
+    command: redis-server /usr/local/etc/redis/redis.conf
+    ports:
+      - '6377:6377'
+    volumes:
+      - redis-node-5-data:/var/lib/redis
+      - ./redis/redis-node-5.conf:/usr/local/etc/redis/redis.conf
+    networks:
+      app_subnet:
+        ipv4_address: 192.168.86.35
+
+  redis-node-6:
+    image: 'redis:6.0-alpine'
+    command: redis-server /usr/local/etc/redis/redis.conf
+    ports:
+      - '6378:6378'
+    volumes:
+      - redis-node-6-data:/var/lib/redis
+      - ./redis/redis-node-6.conf:/usr/local/etc/redis/redis.conf
+    networks:
+      app_subnet:
+        ipv4_address: 192.168.86.36
+
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    restart: always
+    hostname: redis-commander
+    environment:
+      - REDIS_HOSTS=1:192.168.86.31:6373,2:192.168.86.32:6374,3:192.168.86.33:6375,4:192.168.86.34:6376,5:192.168.86.35:6377,6:192.168.86.36:6378
+    ports: 
+      - '8081:8081'
+    networks:
+      app_subnet:
+        ipv4_address: 192.168.86.37
+
+
+volumes:
+  redis-node-1-data:
+  redis-node-2-data:
+  redis-node-3-data:
+  redis-node-4-data:
+  redis-node-5-data:
+  redis-node-6-data:
+
+networks:
+  app_subnet:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 192.168.86.0/24
