@@ -1,4 +1,3 @@
-const res = require("express/lib/response")
 const Redis = require("ioredis")
 
 const cluster = new Redis.Cluster([
@@ -29,12 +28,10 @@ const cluster = new Redis.Cluster([
 ])
 
 exports.add = ({key, value} ) =>{
-    console.log(`key: ${key} and value: ${value}`)
     cluster.set(key, value)
 }
 
 exports.get = async (key) => {
-    console.log("this is the key", key)
     result = new Promise( (resolve, reject) => {
         cluster.get(key, (err, message) => {
             if (err) {
@@ -54,7 +51,18 @@ exports.flush = () => {
     })
 }
 
-exports.flushAll = () => {
-   const masters = cluster.nodes("master")
-    Promise.all(masters.map((node) => node.flushall()))
-}
+
+
+
+
+
+
+
+
+
+
+
+// exports.flush = () => {
+//    const masters = cluster.nodes("master")
+//     Promise.all(masters.map((node) => node.flushall()))
+// }
